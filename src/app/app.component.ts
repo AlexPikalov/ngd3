@@ -42,8 +42,25 @@ Y	.01974
 Z	.00074`;
 
   data: { letter: string, freq: number }[];
-  x;
-  y;
+
+  get x() {
+    const x = d3.scaleBand().rangeRound([0, this.effectiveWidth]).padding(0.1);
+
+    x.domain(this.data.map(d => d.letter));
+
+    return x;
+  }
+
+  get y() {
+    const y = d3.scaleLinear().rangeRound([this.effectiveHeight, 0]);
+
+    y.domain([0, d3.max(this.data, d => d.freq)]);
+
+    return y;
+  }
+
+  // x;
+  // y;
 
   get effectiveHeight(): number {
     return this.height - this.margin.top - this.margin.bottom;
@@ -58,6 +75,7 @@ Z	.00074`;
   }
 
   get yAxe(): D3Callee {
+    console.log('evaluate y axe');
     return d3.axisLeft(this.y).ticks(10, '%');
   }
 
@@ -68,14 +86,6 @@ Z	.00074`;
         const [letter, freq] = row.trim().split(/\t/);
         return { letter, freq: +freq };
       });
-
-    this.x = d3.scaleBand().rangeRound([0, this.effectiveWidth]).padding(0.1);
-
-    this.x.domain(this.data.map(d => d.letter));
-
-    this.y = d3.scaleLinear().rangeRound([this.effectiveHeight, 0]);
-
-    this.y.domain([0, d3.max(this.data, d => d.freq)]);
   }
 
   translateTo({left, top}: {left: number, top: number}): string {

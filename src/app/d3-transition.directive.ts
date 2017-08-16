@@ -2,7 +2,7 @@ import {
   Directive,
   Input,
   Output,
-  DoCheck,
+  OnChanges,
   OnInit,
   KeyValueChanges,
   KeyValueDiffers,
@@ -11,25 +11,33 @@ import {
   EventEmitter
 } from '@angular/core';
 
-import { Transition } from 'd3-transition';
-import { select, Selection } from 'd3-selection';
+import * as d3 from 'd3';
+// import { Transition } from 'd3-transition';
+// import { select, Selection } from 'd3-selection';
 
 // TODO: move to types
-type AttrValue = number | string | boolean;
+export type AttrValue = number | string | boolean;
 interface Attrs {
   [key: string]: AttrValue;
 }
 
 // TODO: move to types
-type EaseFn = (normalizedTime: number) => number;
+export type EaseFn = (normalizedTime: number) => number;
 // TODO: move to types
-type SelectionEl = Selection<HTMLElement, any, null, undefined>;
+export type SelectionEl = d3.Selection<HTMLElement, any, null, undefined>;
+
+export type D3Transition = d3.Transition<HTMLElement, any, null, undefined>;
+
+// TODO: move to types
+export type TransitionDecorator = (t: D3Transition) => D3Transition;
 
 // TODO: mulitple transitions per one node, named transitions
 @Directive({
   selector: '[d3Transition]'
 })
-export class D3TransitionDirective implements DoCheck, OnInit {
+export class D3TransitionDirective implements OnChanges, OnInit {
+  @Input() d3Transition: TransitionDecorator = t => t;
+
   @Input() call: any[] = [];
 
   @Input() set duration(d: number) {
@@ -67,7 +75,7 @@ export class D3TransitionDirective implements DoCheck, OnInit {
 
   @Output() onEnd: EventEmitter<SelectionEl>= new EventEmitter();
 
-  @Output() onInterupt: EventEmitter<SelectionEl> = new EventEmitter();
+  @Output() onInterrupt: EventEmitter<SelectionEl> = new EventEmitter();
 
   private _attr: Attrs = null;
   private _style: Attrs = null;
@@ -77,7 +85,7 @@ export class D3TransitionDirective implements DoCheck, OnInit {
   private _selection: SelectionEl;
   private kvAttrDiffer: KeyValueDiffer<string, any>;
   private kvStyleDiffer: KeyValueDiffer<string, any>;
-  private transition: Transition<any, any, any, any>;
+  private transition: d3.Transition<any, any, any, any>;
 
   constructor(
     private kvDiffers: KeyValueDiffers,
@@ -85,17 +93,22 @@ export class D3TransitionDirective implements DoCheck, OnInit {
   ) {}
 
   ngOnInit() {
-    this.transition = select(this.el.nativeElement).transition();
+    // decorate basic transition with parameters provided by a directive consumer
+    this.d3Transition = this.d3Transition || (t => t);
+    this.transition = this.d3Transition(d3.select(this.el.nativeElement).transition().duration(300));
+
     this.transition.on('start', () => this.emitLifeCycle(this.onStart));
     this.transition.on('end', () => this.emitLifeCycle(this.onEnd));
-    this.transition.on('interupt', () => this.emitLifeCycle(this.onInterupt));
-    this.ngDoCheck();
+    this.transition.on('interrupt', () => this.emitLifeCycle(this.onInterrupt));
+
     if (this.call.length > 0) {
       this.call[0](this.transition, ...this.call.slice(1));
     }
+
+    this.ngOnChanges();
   }
 
-  ngDoCheck() {
+  ngOnChanges() {
     const attrChanges = this.kvAttrDiffer.diff(this._attr);
     if (attrChanges && this.transition) {
       this.applyAttrChanges(attrChanges);
@@ -115,7 +128,11 @@ export class D3TransitionDirective implements DoCheck, OnInit {
 
   private setAttr(name: string, value: AttrValue): void {
     // TODO: try to do it via Angular's Renderer
-    this.transition.attr(name, value);
+    try {
+      this.transition.attr(name, value);
+    } catch (err) {
+      console.debug('D3.js: ' + err.message);
+    };
   }
 
   private applyStyleChanges(changes: KeyValueChanges<string, any>): void {
@@ -126,7 +143,11 @@ export class D3TransitionDirective implements DoCheck, OnInit {
 
   private setStyle(name: string, value: AttrValue): void {
     // TODO: try to do it via Angular's Renderer
-    this.transition.style(name, value);
+    try {
+      this.transition.style(name, value);
+    } catch (err) {
+      console.debug('D3.js: ' + err.message);
+    }
   }
 
   private emitLifeCycle(ee: EventEmitter<SelectionEl>): void {
