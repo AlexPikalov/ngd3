@@ -20,13 +20,14 @@
     </g>
   </svg>  -->
 
-   <svg [attr.width]="width" [attr.height]="height">
+  <svg [attr.width]="width" [attr.height]="height">
     <g [attr.transform]="translateTo(margin)">
       <g class="axis axis--x"
         [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
         [d3Call]="xAxe">
       </g>
-      <g class="axis axis--y" [d3Call]="yAxe">
+      <g class="axis axis--y"
+        [d3Call]="yAxe">
         <text transform="rotate(-90)"
           y="6"
           dy="0.71em"
