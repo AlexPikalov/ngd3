@@ -1,4 +1,4 @@
-import {
+export {
     D3CallDirective,
     D3Callee,
     D3Module,

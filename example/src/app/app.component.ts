@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import * as d3 from 'd3';
 
-import { D3Callee } from './d3-call.directive';
+import { D3Callee } from 'ngd3';
 
 @Component({
   selector: 'app-root',

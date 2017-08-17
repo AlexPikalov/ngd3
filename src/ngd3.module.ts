@@ -10,7 +10,11 @@ import { D3TransitionDirective } from './d3-transition.directive';
     ],
     declarations: [
         D3CallDirective,
-        D3CallDirective
+        D3TransitionDirective
+    ],
+    exports: [
+        D3CallDirective,
+        D3TransitionDirective
     ]
 })
 export class D3Module {}
