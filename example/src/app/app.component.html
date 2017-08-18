@@ -34,7 +34,7 @@
           text-anchor="end"
           >Frequency</text>
       </g>
-       <rect class="bar" *ngFor="let d of data"
+       <rect class="bar" *ngFor="let d of data; trackBy: dataComparator"
         [d3Transition]="transition"
         [attr.x]="x(d.letter)"
         [attr.width]="x.bandwidth()"

@@ -87,14 +87,17 @@ Z	.00074`;
           return { letter, freq: 0 };
         });
     setInterval(() => {
-      this.data.forEach(d => d.freq = this.generateFreq());
-      // this.data = this.rawData
-      //   .split('\n')
-      //   .map(row => {
-      //     const [letter, freq] = row.trim().split(/\t/);
-      //     return { letter, freq: this.generateFreq() };
-      //   });
+      this.data = this.rawData
+        .split('\n')
+        .map(row => {
+          const [letter, freq] = row.trim().split(/\t/);
+          return { letter, freq: this.generateFreq() };
+        });
     }, 10000);
+  }
+
+  dataComparator(i: number, item: any) {
+    return item.letter;
   }
 
   translateTo({left, top}: {left: number, top: number}): string {
@@ -105,8 +108,5 @@ Z	.00074`;
     return MAX_FREQ * Math.random();
   }
 }
-
-// TODO: create call-d3 directive which would just make a d3 selection
-// of a host element and make a d3 call in its context
 
 // TODO: create helper directive translate, translateX, translateY. Low priority.
