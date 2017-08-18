@@ -13,7 +13,7 @@ const MAX_FREQ: number = 0.15;
 export class AppComponent {
   width = 480;
   height = 250;
-  margin: {top?: number, right?: number, bottom?: number, left?: number} = {
+  margin: {top: number, right: number, bottom: number, left: number} = {
     top: 20, right: 20, bottom: 30, left: 40
   };
   private rawData = `A	.08167
@@ -100,7 +100,7 @@ Z	.00074`;
     return item.letter;
   }
 
-  translateTo({left, top}: {left: number, top: number}): string {
+  translateTo({left = 0, top = 0}: {left?: number, top?: number}): string {
     return `translate(${left},${top})`;
   }
 
