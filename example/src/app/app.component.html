@@ -1,5 +1,5 @@
 <div>
-   <!-- <svg [attr.width]="width" [attr.height]="height">
+  <svg [attr.width]="width" [attr.height]="height">
     <g [attr.transform]="translateTo(margin)">
       <g class="axis axis--x"
         [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
@@ -18,7 +18,7 @@
         [attr.width]="x.bandwidth()"
         [attr.height]="effectiveHeight - y(d.freq)"></rect>
     </g>
-  </svg>  -->
+  </svg>
 
   <svg [attr.width]="width" [attr.height]="height">
     <g [attr.transform]="translateTo(margin)">
@@ -35,12 +35,10 @@
           >Frequency</text>
       </g>
        <rect class="bar" *ngFor="let d of data"
-        d3Transition
+        [d3Transition]="transition"
         [attr.x]="x(d.letter)"
-        [attr.y]="y(d.freq)"
         [attr.width]="x.bandwidth()"
-        [attr.height]="0"
-        [d3-attr]="{height: effectiveHeight - y(d.freq)}"></rect> 
+        [d3-attr]="{height: effectiveHeight - y(d.freq), y: y(d.freq)}"></rect> 
     </g>
   </svg>  
 </div>

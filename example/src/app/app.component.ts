@@ -3,14 +3,16 @@ import * as d3 from 'd3';
 
 import { D3Callee } from 'ngd3';
 
+const MAX_FREQ: number = 0.15;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  width = 960;
-  height = 500;
+  width = 480;
+  height = 250;
   margin: {top?: number, right?: number, bottom?: number, left?: number} = {
     top: 20, right: 20, bottom: 30, left: 40
   };
@@ -41,7 +43,9 @@ X	.00150
 Y	.01974
 Z	.00074`;
 
-  data: { letter: string, freq: number }[];
+  data: { letter: string, freq: number }[] = [];
+
+  transition = t => t.duration(300);
 
   get x() {
     const x = d3.scaleBand().rangeRound([0, this.effectiveWidth]).padding(0.1);
@@ -54,13 +58,10 @@ Z	.00074`;
   get y() {
     const y = d3.scaleLinear().rangeRound([this.effectiveHeight, 0]);
 
-    y.domain([0, d3.max(this.data, d => d.freq)]);
+    y.domain([0, 0.15]);
 
     return y;
   }
-
-  // x;
-  // y;
 
   get effectiveHeight(): number {
     return this.height - this.margin.top - this.margin.bottom;
@@ -75,21 +76,33 @@ Z	.00074`;
   }
 
   get yAxe(): D3Callee {
-    console.log('evaluate y axe');
     return d3.axisLeft(this.y).ticks(10, '%');
   }
 
   constructor() {
     this.data = this.rawData
-      .split('\n')
-      .map(row => {
-        const [letter, freq] = row.trim().split(/\t/);
-        return { letter, freq: +freq };
-      });
+        .split('\n')
+        .map(row => {
+          const [letter, freq] = row.trim().split(/\t/);
+          return { letter, freq: 0 };
+        });
+    setInterval(() => {
+      this.data.forEach(d => d.freq = this.generateFreq());
+      // this.data = this.rawData
+      //   .split('\n')
+      //   .map(row => {
+      //     const [letter, freq] = row.trim().split(/\t/);
+      //     return { letter, freq: this.generateFreq() };
+      //   });
+    }, 10000);
   }
 
   translateTo({left, top}: {left: number, top: number}): string {
     return `translate(${left},${top})`;
+  }
+
+  private generateFreq(): number {
+    return MAX_FREQ * Math.random();
   }
 }
 
