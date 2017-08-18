@@ -12,8 +12,6 @@ import {
 } from '@angular/core';
 
 import * as d3 from 'd3';
-// import { Transition } from 'd3-transition';
-// import { select, Selection } from 'd3-selection';
 
 // TODO: move to types
 export type AttrValue = number | string | boolean;
@@ -25,11 +23,12 @@ interface Attrs {
 export type EaseFn = (normalizedTime: number) => number;
 // TODO: move to types
 export type SelectionEl = d3.Selection<HTMLElement, any, null, undefined>;
-
+// TODO: move to types
 export type D3Transition = d3.Transition<HTMLElement, any, null, undefined>;
-
 // TODO: move to types
 export type TransitionDecorator = (t: D3Transition) => D3Transition;
+// TODO: move to types
+export type TweenFn = d3.ValueFn<HTMLElement, any, (t: number) => string> | undefined;
 
 // TODO: mulitple transitions per one node, named transitions
 @Directive({
@@ -40,35 +39,24 @@ export class D3TransitionDirective implements OnChanges, OnInit {
 
   @Input() call: any[] = [];
 
-  @Input() set duration(d: number) {
-    if (d !== this._duration && this.transition) {
-      this._duration = d;
-      this.transition.duration(d);
-    }
-  }
-
-  @Input() set ease(e: EaseFn) {
-    if (e !== this._ease && this.transition) {
-      this._ease = e;
-      this.transition.ease(e);
-    }
-  }
-
-  @Input() set delay(d: number) {
-    if (d !== this._delay && this.transition) {
-      this._delay = d;
-      this.transition.delay(d);
-    }
-  }
-
   @Input('d3-attr') set attr(v: Attrs) {
     this.kvAttrDiffer = this.kvDiffers.find(v).create();
     this._attr = v;
+  }
+  
+  @Input('d3-attr-tween') set attrTween(t: {[key: string]: TweenFn}) {
+    this.kvAttrTweenDiffer = this.kvDiffers.find(t).create();
+    this._attrTween = t;
   }
 
   @Input('d3-style') set style(v: Attrs) {
     this.kvStyleDiffer = this.kvDiffers.find(v).create();
     this._style = v;
+  }
+
+  @Input('d3-style-tween') set styleTween(t: {[key: string]: TweenFn}) {
+    this.kvStyleTweenDiffer = this.kvDiffers.find(t).create();
+    this._styleTween = t;
   }
 
   @Output() onStart: EventEmitter<SelectionEl> = new EventEmitter();
@@ -79,24 +67,24 @@ export class D3TransitionDirective implements OnChanges, OnInit {
 
   private _attr: Attrs = null;
   private _style: Attrs = null;
-  private _delay: number = null;
-  private _duration: number = null;
-  private _ease: EaseFn = null;
+  private _attrTween: {[key: string]: TweenFn} = null;
+  private _styleTween: {[key: string]: TweenFn} = null;
   private _selection: SelectionEl;
+
   private kvAttrDiffer: KeyValueDiffer<string, any>;
+  private kvAttrTweenDiffer: KeyValueDiffer<string, any>;
   private kvStyleDiffer: KeyValueDiffer<string, any>;
+  private kvStyleTweenDiffer: KeyValueDiffer<string, any>;
   private transition: d3.Transition<any, any, any, any>;
 
   constructor(
     private kvDiffers: KeyValueDiffers,
     private el: ElementRef
-  ) {}
+  ) {
+    this.d3Transition = t => t;
+  }
 
   ngOnInit() {
-    // decorate basic transition with parameters provided by a directive consumer
-    this.d3Transition = this.d3Transition || (t => t);
-    this.transition = this.d3Transition(d3.select(this.el.nativeElement).transition().duration(300));
-
     this.transition.on('start', () => this.emitLifeCycle(this.onStart));
     this.transition.on('end', () => this.emitLifeCycle(this.onEnd));
     this.transition.on('interrupt', () => this.emitLifeCycle(this.onInterrupt));
@@ -109,6 +97,20 @@ export class D3TransitionDirective implements OnChanges, OnInit {
   }
 
   ngOnChanges() {
+    this.initTransition();
+
+    // apply tweens
+    const attrTweenChanges = this.kvAttrDiffer.diff(this._attrTween);
+    if (attrTweenChanges && this.transition) {
+      this.applyAttrTweenChanges(attrTweenChanges);
+    }
+
+    const stylesTweenChanges = this.kvAttrDiffer.diff(this._styleTween);
+    if (stylesTweenChanges && this.transition) {
+      this.applyStyleTweenChanges(stylesTweenChanges);
+    }
+
+    // set attributes and styles
     const attrChanges = this.kvAttrDiffer.diff(this._attr);
     if (attrChanges && this.transition) {
       this.applyAttrChanges(attrChanges);
@@ -120,6 +122,14 @@ export class D3TransitionDirective implements OnChanges, OnInit {
     }
   }
 
+  private initTransition() {
+    if (this._selection) {
+      this._selection.interrupt();
+    }
+    this.d3Transition = this.d3Transition || (t => t);
+    this.transition = this.d3Transition(d3.select(this.el.nativeElement).transition());
+  }
+
   private applyAttrChanges(changes: KeyValueChanges<string, any>): void {
     changes.forEachAddedItem(record => this.setAttr(record.key, record.currentValue));
     changes.forEachChangedItem(record => this.setAttr(record.key, record.currentValue));
@@ -128,11 +138,17 @@ export class D3TransitionDirective implements OnChanges, OnInit {
 
   private setAttr(name: string, value: AttrValue): void {
     // TODO: try to do it via Angular's Renderer
-    try {
-      this.transition.attr(name, value);
-    } catch (err) {
-      console.debug('D3.js: ' + err.message);
-    };
+    this.safeExecute(() => this.transition.attr(name, value));
+  }
+
+  private applyAttrTweenChanges(changes: KeyValueChanges<string, any>): void {
+    changes.forEachAddedItem(record => this.setAttrTween(record.key, record.currentValue));
+    changes.forEachChangedItem(record => this.setAttrTween(record.key, record.currentValue));
+    changes.forEachRemovedItem(record => this.setAttrTween(record.key, null));
+  }
+
+  private setAttrTween(name: string, value: TweenFn): void {
+    this.safeExecute(() => this.transition.attrTween(name, value));
   }
 
   private applyStyleChanges(changes: KeyValueChanges<string, any>): void {
@@ -143,14 +159,29 @@ export class D3TransitionDirective implements OnChanges, OnInit {
 
   private setStyle(name: string, value: AttrValue): void {
     // TODO: try to do it via Angular's Renderer
-    try {
-      this.transition.style(name, value);
-    } catch (err) {
-      console.debug('D3.js: ' + err.message);
-    }
+    this.safeExecute(() => this.transition.style(name, value));
+  }
+
+  private applyStyleTweenChanges(changes: KeyValueChanges<string, any>): void {
+    changes.forEachAddedItem(record => this.setStyleTween(record.key, record.currentValue));
+    changes.forEachChangedItem(record => this.setStyleTween(record.key, record.currentValue));
+    changes.forEachRemovedItem(record => this.setStyleTween(record.key, null));
+  }
+
+  private setStyleTween(name: string, value: TweenFn): void {
+    // TODO: try to do it via Angular's Renderer
+    this.safeExecute(() => this.transition.styleTween(name, value));
   }
 
   private emitLifeCycle(ee: EventEmitter<SelectionEl>): void {
     ee.emit(this._selection);
+  }
+
+  private safeExecute(fn: Function): void {
+    try {
+      fn();
+    } catch (err) {
+      console.debug('D3.js: ' + err.message);
+    }
   }
 }
