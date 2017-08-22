@@ -1,0 +1,15 @@
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
+
+.chart-card {
+  display: inline-block
+}

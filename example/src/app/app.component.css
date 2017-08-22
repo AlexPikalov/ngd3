@@ -1,11 +1,9 @@
-.bar {
-  fill: steelblue;
+.app-container {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  text-align: center;
 }
 
-.bar:hover {
-  fill: brown;
-}
-
-.axis--x path {
-  display: none;
+app-bar-charts {
+  display: inline-block;
 }

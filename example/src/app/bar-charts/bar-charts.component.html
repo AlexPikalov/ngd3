@@ -1,0 +1,59 @@
+<div class="thumbnail chart-card">
+  <svg [attr.width]="width" [attr.height]="height">
+    <g *ngIf="data">
+      <g [attr.transform]="translateTo(margin)">
+        <g class="axis axis--x"
+          [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
+          [d3Call]="xAxe">
+        </g>
+        <g class="axis axis--y" [d3Call]="yAxe">
+          <text transform="rotate(-90)"
+            y="6"
+            dy="0.71em"
+            text-anchor="end">
+              Frequency
+          </text>
+        </g>
+        <rect class="bar" *ngFor="let d of data"
+          [attr.x]="x(d.letter)"
+          [attr.y]="y(d.freq)"
+          [attr.width]="x.bandwidth()"
+          [attr.height]="effectiveHeight - y(d.freq)">
+        </rect>
+      </g>
+    </g>
+  </svg>
+  <div class="caption">
+    <h4>Barcharts without transition</h4>
+  </div>
+</div>
+<div class="thumbnail chart-card">
+  <svg [attr.width]="width" [attr.height]="height">
+    <g *ngIf="data">
+      <g [attr.transform]="translateTo(margin)">
+        <g class="axis axis--x"
+          [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
+          [d3Call]="xAxe">
+        </g>
+        <g class="axis axis--y"
+          [d3Call]="yAxe">
+          <text transform="rotate(-90)"
+            y="6"
+            dy="0.71em"
+            text-anchor="end">
+              Frequency
+          </text>
+        </g>
+          <rect class="bar" *ngFor="let d of data; trackBy: dataComparator"
+          [d3Transition]="transition"
+          [attr.x]="x(d.letter)"
+          [attr.width]="x.bandwidth()"
+          [d3-attr]="{height: effectiveHeight - y(d.freq), y: y(d.freq)}">
+        </rect> 
+      </g>
+    </g>
+  </svg>
+  <div class="caption">
+    <h4>Barcharts with transition</h4>
+  </div>
+</div>

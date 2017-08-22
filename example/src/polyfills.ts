@@ -41,6 +41,12 @@
 import 'core-js/es6/reflect';
 import 'core-js/es7/reflect';
 
+import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/interval';
+
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/startWith';
 
 /**
  * Required to support Web Animations `@angular/animation`.
