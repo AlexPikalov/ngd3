@@ -1,16 +1,16 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import * as d3 from 'd3';
 
 import { D3Callee } from 'ngd3';
 
-const MAX_FREQ: number = 0.15;
+const MAX_FREQ = 0.15;
 
 @Component({
   selector: 'app-bar-charts',
   templateUrl: './bar-charts.component.html',
   styleUrls: ['./bar-charts.component.css']
 })
-export class BarChartsComponent implements OnChanges {
+export class BarChartsComponent {
   @Input() data: { letter: string, freq: number }[] = [];
 
   /**
@@ -87,15 +87,11 @@ export class BarChartsComponent implements OnChanges {
     return d3.axisLeft(this.y).ticks(10, '%');
   }
 
-  ngOnChanges(changes) {
-    console.log('CHANGE', changes);
-  }
-
   /**
    * Comparator that helps to identify particular item in the list.
    * It has been used by ngForOf directive
-   * @param i 
-   * @param item 
+   * @param i
+   * @param item
    */
   dataComparator(i: number, item: any) {
     return item.letter;
