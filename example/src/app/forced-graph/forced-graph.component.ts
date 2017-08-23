@@ -29,11 +29,6 @@ export class ForcedGraphComponent implements OnInit {
 
   color: d3.ScaleOrdinal<any, any> = d3.scaleOrdinal(d3.schemeCategory20);
 
-  drag = d3.drag()
-    .on('start', this.dragStarted.bind(this))
-    .on('drag', this.dragged.bind(this))
-    .on('end', this.dragended.bind(this));
-
   simulation = d3.forceSimulation<MyNode, MyLink>()
     .force(FORCE, d3.forceLink().id((d: any) => d.id))
     .force('charge', d3.forceManyBody<MyNode>())
