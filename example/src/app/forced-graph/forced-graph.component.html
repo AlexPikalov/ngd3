@@ -1,0 +1,42 @@
+<svg [attr.width]="width" [attr.height]="height">
+  <g *ngIf="data"> 
+    <g class="links">
+       <line *ngFor="let line of data.links"
+        [attr.stroke-width]="linkWidth(d)"
+        [attr.x1]="linkX1(d)"
+        [attr.y1]="linkY1(d)"
+        [attr.x1]="linkX2(d)"
+        [attr.y1]="linkY2(d)">
+      </line> 
+    </g>
+    <g class="nodes">
+      <circle *ngFor="let node of data.nodes"
+        r="5"
+        [attr.fill]="color(d.group)"
+        [attr.cx]="nodeX(d)"
+        [attr.cy]="nodeY(d)">
+          <title>{{ d.id }}</title>
+      </circle>
+    </g>
+    <!-- <g [attr.transform]="translateTo(margin)">
+      <g class="axis axis--x"
+        [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
+        [d3Call]="xAxe">
+      </g>
+      <g class="axis axis--y" [d3Call]="yAxe">
+        <text transform="rotate(-90)"
+          y="6"
+          dy="0.71em"
+          text-anchor="end">
+            Frequency
+        </text>
+      </g>
+      <rect class="bar" *ngFor="let d of data"
+        [attr.x]="x(d.letter)"
+        [attr.y]="y(d.freq)"
+        [attr.width]="x.bandwidth()"
+        [attr.height]="effectiveHeight - y(d.freq)">
+      </rect>
+    </g> -->
+  </g> 
+</svg>

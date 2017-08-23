@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
+
+import { graphData } from './graph.data';
 
 @Injectable()
 export class DataService {
@@ -15,6 +16,10 @@ export class DataService {
       .interval(this.intervalMs)
       .map(() => this.generateLetterFreqs())
       .startWith(this.generateLetterFreqs());
+  }
+
+  graphData(): Observable<any> {
+    return Observable.of(graphData);
   }
 
   private generateLetterFreqs(): any[] {

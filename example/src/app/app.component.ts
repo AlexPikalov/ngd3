@@ -12,8 +12,10 @@ import { DataService } from './shared/data.service';
 })
 export class AppComponent {
   letterFeqs: Observable<any>;
+  graphData: Observable<any>;
 
   constructor(private dataService: DataService) {
-    this.letterFeqs = this.dataService.letterFrequencies().do(d => console.log('>>', d));
+    this.letterFeqs = this.dataService.letterFrequencies();
+    this.graphData = this.dataService.graphData().do(d => console.log(d));
   }
 }
