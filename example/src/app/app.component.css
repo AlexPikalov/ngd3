@@ -4,6 +4,6 @@
   text-align: center;
 }
 
-app-bar-charts {
+app-bar-charts, app-forced-graph {
   display: inline-block;
 }
