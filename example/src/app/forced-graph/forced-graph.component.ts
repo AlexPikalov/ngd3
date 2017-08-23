@@ -4,13 +4,21 @@ import * as d3 from 'd3';
 
 const FORCE = 'forse';
 
-interface MyNode extends d3.SimulationNodeDatum {}
+interface MyNode extends d3.SimulationNodeDatum {
+  id: string;
+  group: 1;
+}
 
-interface MyLink extends d3.SimulationLinkDatum<d3.SimulationNodeDatum> {}
+interface MyLink extends d3.SimulationLinkDatum<d3.SimulationNodeDatum> {
+  source: string;
+  target: string;
+  value: number;
+}
 
 @Component({
   selector: 'app-forced-graph',
-  templateUrl: './forced-graph.component.html'
+  templateUrl: './forced-graph.component.html',
+  styleUrls: ['./forced-graph.component.css']
 })
 export class ForcedGraphComponent implements OnInit {
   @Input() data: { nodes: any[], links: any[] };
@@ -21,14 +29,28 @@ export class ForcedGraphComponent implements OnInit {
 
   color: d3.ScaleOrdinal<any, any> = d3.scaleOrdinal(d3.schemeCategory20);
 
+  drag = d3.drag()
+    .on('start', this.dragStarted.bind(this))
+    .on('drag', this.dragged.bind(this))
+    .on('end', this.dragended.bind(this));
+
   simulation = d3.forceSimulation<MyNode, MyLink>()
     .force(FORCE, d3.forceLink().id((d: any) => d.id))
     .force('charge', d3.forceManyBody<MyNode>())
-    .force('center', d3.forceCenter<MyLink>(this.width / 2, this.height / 2));
+    .force('center', d3.forceCenter<MyNode>(this.width / 2, this.height / 2));
 
   ngOnInit() {
     this.simulation.nodes(this.data.nodes);
-    d3.forceLink(this.data.links);
+    // TODO: fix issue with generic types and absence of links method for
+    // some of type parameters
+    (this.simulation.force(FORCE) as any).links(this.data.links);
+  }
+
+  dragFactory(d) {
+    return d3.drag()
+    .on('start', () => this.dragStarted(d))
+    .on('drag', () => this.dragged(d))
+    .on('end', () => this.dragended(d));
   }
 
   linkWidth(d: {value?: number}): number {
@@ -58,5 +80,22 @@ export class ForcedGraphComponent implements OnInit {
 
   nodeY(d) {
     return d ? d.y : 0;
+  }
+
+  dragStarted(el) {
+    if (!d3.event.active) { this.simulation.alphaTarget(0.3).restart(); }
+    el.fx = el.x;
+    el.fy = el.y;
+  }
+
+  dragged(el) {
+    el.fx = d3.event.x;
+    el.fy = d3.event.y;
+  }
+
+  dragended(el) {
+    if (!d3.event.active) { this.simulation.alphaTarget(0); }
+    el.fx = null;
+    el.fy = null;
   }
 }
