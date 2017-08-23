@@ -23,7 +23,7 @@ interface MyLink extends d3.SimulationLinkDatum<d3.SimulationNodeDatum> {
 export class ForcedGraphComponent implements OnInit {
   @Input() data: { nodes: any[], links: any[] };
 
-  width = 960;
+  width = 974;
 
   height = 600;
 
