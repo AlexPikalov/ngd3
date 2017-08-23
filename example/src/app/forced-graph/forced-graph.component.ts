@@ -78,7 +78,7 @@ export class ForcedGraphComponent implements OnInit {
   }
 
   dragStarted(el) {
-    if (!d3.event.active) { this.simulation.alphaTarget(0.3).restart(); }
+    if (!d3.event.active) { this.simulation.alphaTarget(0.6).restart(); }
     el.fx = el.x;
     el.fy = el.y;
   }

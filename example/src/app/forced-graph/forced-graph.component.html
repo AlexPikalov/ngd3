@@ -1,43 +1,28 @@
-<svg [attr.width]="width" [attr.height]="height">
-  <g *ngIf="data"> 
-    <g class="links">
-       <line *ngFor="let line of data.links"
-        [attr.stroke-width]="linkWidth(line)"
-        [attr.x1]="linkX1(line)"
-        [attr.y1]="linkY1(line)"
-        [attr.x2]="linkX2(line)"
-        [attr.y2]="linkY2(line)">
-      </line> 
-    </g>
-    <g class="nodes">
-      <circle *ngFor="let node of data.nodes"
-        r="5"
-        [attr.fill]="color(node.group)"
-        [attr.cx]="nodeX(node)"
-        [attr.cy]="nodeY(node)"
-        [d3Call]="dragFactory(node)">
-          <title>{{ node.id }}</title>
-      </circle>
-    </g>
-    <!-- <g [attr.transform]="translateTo(margin)">
-      <g class="axis axis--x"
-        [attr.transform]="translateTo({left: 0, top: effectiveHeight})"
-        [d3Call]="xAxe">
+<div class="thumbnail chart-card">
+  <svg [attr.width]="width" [attr.height]="height">
+    <g *ngIf="data"> 
+      <g class="links">
+        <line *ngFor="let line of data.links"
+          [attr.stroke-width]="linkWidth(line)"
+          [attr.x1]="linkX1(line)"
+          [attr.y1]="linkY1(line)"
+          [attr.x2]="linkX2(line)"
+          [attr.y2]="linkY2(line)">
+        </line>
       </g>
-      <g class="axis axis--y" [d3Call]="yAxe">
-        <text transform="rotate(-90)"
-          y="6"
-          dy="0.71em"
-          text-anchor="end">
-            Frequency
-        </text>
+      <g class="nodes">
+        <circle *ngFor="let node of data.nodes"
+          r="5"
+          [attr.fill]="color(node.group)"
+          [attr.cx]="nodeX(node)"
+          [attr.cy]="nodeY(node)"
+          [d3Call]="dragFactory(node)">
+            <title>{{ node.id }}</title>
+        </circle>
       </g>
-      <rect class="bar" *ngFor="let d of data"
-        [attr.x]="x(d.letter)"
-        [attr.y]="y(d.freq)"
-        [attr.width]="x.bandwidth()"
-        [attr.height]="effectiveHeight - y(d.freq)">
-      </rect>
-    </g> -->
-  </g> 
-</svg>
+    </g> 
+  </svg>
+  <div class="caption">
+    <h4>Forced graph</h4>
+  </div>
+</div>
